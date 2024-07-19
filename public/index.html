@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkbox App</title>
+  <style>
+    .checkbox-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .checkbox-item {
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkbox-container"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const container = document.querySelector('.checkbox-container');
+
+    const createCheckbox = (id, checked) => {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `checkbox-${id}`;
+      checkbox.checked = checked;
+      checkbox.addEventListener('click', () => {
+        socket.emit('checkboxClicked', id);
+      });
+      return checkbox;
+    };
+
+    socket.on('initialState', (checkboxes) => {
+      checkboxes.forEach(({ id, checked }) => {
+        const checkbox = createCheckbox(id, checked);
+        const label = document.createElement('label');
+        label.htmlFor = `checkbox-${id}`;
+        label.appendChild(checkbox);
+        container.appendChild(label);
+        container.appendChild(document.createTextNode(' '));
+      });
+    });
+
+    socket.on('checkboxChecked', (id) => {
+      const checkbox = document.getElementById(`checkbox-${id}`);
+      checkbox.checked = true;
+    });
+  </script>
+</body>
+</html>
